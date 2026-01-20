@@ -1,118 +1,20 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todo App</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .todo-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .todo-form input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        .todo-form input[type="text"]:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        .todo-form button {
-            padding: 12px 24px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .todo-form button:hover {
-            background-color: #0056b3;
-        }
-        .error {
-            color: #dc3545;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        .todo-list {
-            list-style: none;
-        }
-        .todo-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .todo-item.completed .todo-title {
-            text-decoration: line-through;
-            color: #888;
-        }
-        .todo-title {
-            flex: 1;
-            font-size: 16px;
-        }
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-toggle {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-toggle:hover {
-            background-color: #1e7e34;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-delete:hover {
-            background-color: #c82333;
-        }
-        .empty-message {
-            text-align: center;
-            color: #888;
-            padding: 40px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Todo App</h1>
+
+<body class="bg-blue-100 min-h-screen py-8 px-4">
+    <div class="max-w-xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-800 mb-8">Todo App</h1>
 
         {{-- エラー表示 --}}
         @if ($errors->any())
-            <div class="error">
+            <div class="mb-4 text-red-600 text-sm">
                 @foreach ($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach
@@ -120,27 +22,47 @@
         @endif
 
         {{-- 新規作成フォーム --}}
-        <form action="{{ route('todos.store') }}" method="POST" class="todo-form">
+        <form action="{{ route('todos.store') }}" method="POST" class="flex gap-3 mb-6">
             @csrf
-            <input type="text" name="title" placeholder="新しいタスクを入力..." value="{{ old('title') }}">
-            <button type="submit">追加</button>
+            <input type="text" name="title" placeholder="新しいタスクを入力..." value="{{ old('title') }}"
+                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-500">
+            <button type="submit"
+                class="px-6 py-3 bg-blue-500 text-white rounded-lg text-base font-medium hover:bg-blue-600 transition-colors">
+                追加
+            </button>
         </form>
+        {{-- 成功メッセージ --}}
+        @if (session('success'))
+            <div class="mb-4 text-green-600 text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('delete'))
+            <div class="mb-4 text-red-600 text-sm">
+                {{ session('delete') }}
+            </div>
+        @endif
 
         {{-- Todo一覧 --}}
         @if ($todos->isEmpty())
-            <p class="empty-message">タスクがありません</p>
+            <p class="text-center text-gray-500 py-10">タスクがありません</p>
         @else
-            <ul class="todo-list">
+            <ul class="space-y-3">
                 @foreach ($todos as $todo)
-                    <li class="todo-item {{ $todo->is_completed ? 'completed' : '' }}">
-                        <span class="todo-title">{{ $todo->title }}</span>
+                    <li class="flex items-center gap-4 p-4 bg-white rounded-lg shadow">
+                        <span
+                            class="flex-1 text-base {{ $todo->is_completed ? 'line-through text-gray-400' : 'text-gray-800' }}">
+                            {{ $todo->title }}
+                        </span>
 
                         {{-- 完了/未完了切り替え --}}
                         <form action="{{ route('todos.toggle', $todo) }}" method="POST">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="btn btn-toggle">
-                                {{ $todo->is_completed ? '未完了に戻す' : '完了' }}
+                            <button type="submit"
+                                class="px-4 py-2 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">
+                                {{ $todo->is_completed ? '戻す' : '完了' }}
                             </button>
                         </form>
 
@@ -148,7 +70,10 @@
                         <form action="{{ route('todos.destroy', $todo) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-delete">削除</button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors">
+                                削除
+                            </button>
                         </form>
                     </li>
                 @endforeach
@@ -156,4 +81,5 @@
         @endif
     </div>
 </body>
+
 </html>

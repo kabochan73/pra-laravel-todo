@@ -25,7 +25,7 @@ class TodoController extends Controller
             'title' => $request->title,
         ]);
 
-        return redirect()->route('todos.index');
+        return redirect()->route('todos.index')->with('success', 'タスクが追加されました。');
     }
 
     // 完了/未完了の切り替え
@@ -43,6 +43,6 @@ class TodoController extends Controller
     {
         $todo->delete();
 
-        return redirect()->route('todos.index');
+        return redirect()->route('todos.index')->with('delete', 'タスクが削除されました。');
     }
 }
