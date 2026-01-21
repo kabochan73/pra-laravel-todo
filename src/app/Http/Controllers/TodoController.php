@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTodoRequest;
 use App\Models\Todo;
 use Illuminate\Http\Request;
 
@@ -15,12 +16,8 @@ class TodoController extends Controller
     }
 
     // 新規作成
-    public function store(Request $request)
+    public function store(StoreTodoRequest $request)
     {
-        $request->validate([
-            'title' => 'required|max:255',
-        ]);
-
         Todo::create([
             'title' => $request->title,
         ]);
